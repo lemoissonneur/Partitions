@@ -10,4 +10,4 @@ You can use this to manage probability of occurence when randomly spawning prefa
 ![PartsExampleCode](https://user-images.githubusercontent.com/17100561/143040770-28ed843e-0129-4596-a03d-39a7402d5b12.PNG)
 
 Here you have a 63% chances of spawning the prefab C, 13% for B and 24% for prefab A.
-![PartsExample](https://user-images.githubusercontent.com/17100561/143040775-ba718865-e88a-4125-b72a-38ee239b2c56.PNG)
+![PartsExample](https://user-images.githubusercontent.com/17100561/143041901-05198573-e1df-4878-a738-79b7b397ce1f.PNG)
