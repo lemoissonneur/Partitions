@@ -278,7 +278,7 @@ namespace CobayeStudio
             for (int i = 0; i < elements.Count; i++) values[i] = elements[i].Value;
 
             // correct values with the rule
-            PartitionManagement.CorrectPartition(values, s_DragCache.m_ActivePartition, PartitionEditRule.AdjustLeftAndRight);
+            PartitionManagement.CorrectPartition(values, (s_DragCache !=  null ? s_DragCache.m_ActivePartition : 0 ), PartitionEditRule.AdjustLeftAndRight);
 
             // re applly corrected values
             for (int i = 0; i < elements.Count; i++) elements[i].Value = values[i];
