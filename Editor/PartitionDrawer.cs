@@ -272,25 +272,16 @@ namespace CobayeStudio
                     currentEvent.Use();
                     break;
             }
-            
+
             // data correction
-            foreach (Element e in elements) if (e.Value < 0.0f) e.Value = 0.0f;
+            float[] values = new float[elements.Count];
+            for (int i = 0; i < elements.Count; i++) values[i] = elements[i].Value;
 
-            float sum = 0.0f;
-            foreach (Element e in elements) sum += e.Value;
+            // correct values with the rule
+            PartitionManagement.CorrectPartition(values, s_DragCache.m_ActivePartition, PartitionEditRule.AdjustLeftAndRight);
 
-            // if total is too low, add extra to the last
-            if(sum < 1.0f)
-            {
-                elements[elements.Count - 1].Value += (1.0f - sum);
-            }
-            
-            // if total is too high, cut last > 0 in  half
-            if(sum > 1.0f)
-            {
-                float extra = sum - 1.0f;
-                foreach (Element e in elements) e.Value -= extra * e.Value / sum;
-            }
+            // re applly corrected values
+            for (int i = 0; i < elements.Count; i++) elements[i].Value = values[i];
         }
     }
 }
