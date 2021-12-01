@@ -55,7 +55,7 @@ namespace CobayeStudio
 
             EditorGUI.indentLevel++;
 
-            EditorGUI.PropertyField(ListRect(position), listProperty);
+            EditorGUI.PropertyField(ListRect(position), listProperty, true);
 
             EditorGUI.indentLevel-=2;
         }
