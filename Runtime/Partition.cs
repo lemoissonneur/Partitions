@@ -13,7 +13,7 @@ namespace CobayeStudio
     [Serializable]
     public abstract class PartitionBase
     {
-        protected abstract List<ElementBase> _elements { get; }
+        protected abstract IList _elements { get; }
 
         /// <summary>
         /// Base class for PropertyDrawer
@@ -43,11 +43,11 @@ namespace CobayeStudio
             if (value >= 1.0f) return _elements.Count - 1;
 
             int index = 0;
-            float sum = _elements[index].Value;
+            float sum = (_elements[index] as ElementBase).Value;
 
             while (value > sum)
             {
-                sum += _elements[++index].Value;
+                sum += (_elements[++index] as ElementBase).Value;
             }
 
             return index;
@@ -61,7 +61,7 @@ namespace CobayeStudio
         public ElementBase GetElement(float value)
         {
             int index = GetIndex(value);
-            if (index != -1) return _elements[index];
+            if (index != -1) return _elements[index] as ElementBase;
             else return null;
         }
 
@@ -87,7 +87,7 @@ namespace CobayeStudio
             if (values.Length == _elements.Count)
             {
                 for (int i = 0; i < _elements.Count; i++)
-                    _elements[i].Value = values[i];
+                    (_elements[i] as ElementBase).Value = values[i];
             }
 
             CorrectPartition();
@@ -95,22 +95,22 @@ namespace CobayeStudio
 
         public void SetValue(int index, float value, PartitionEditRule rule = PartitionEditRule.Default)
         {
-            _elements[index].Value = value;
+            (_elements[index] as ElementBase).Value = value;
 
             CorrectPartition(index, rule);
         }
 
-        private void CorrectPartition(int index = 0, PartitionEditRule rule = PartitionEditRule.Default)
+        protected void CorrectPartition(int index = 0, PartitionEditRule rule = PartitionEditRule.Default)
         {
             // copy values
             float[] values = new float[_elements.Count];
-            for (int i = 0; i < _elements.Count; i++) values[i] = _elements[i].Value;
+            for (int i = 0; i < _elements.Count; i++) values[i] = (_elements[i] as ElementBase).Value;
 
             // correct values with the rule
             PartitionManagement.CorrectPartition(values, index, rule);
 
             // re applly corrected values
-            for (int i = 0; i < _elements.Count; i++) _elements[i].Value = values[i];
+            for (int i = 0; i < _elements.Count; i++) (_elements[i] as ElementBase).Value = values[i];
         }
     }
 
@@ -120,7 +120,7 @@ namespace CobayeStudio
     [Serializable]
     public class Partition : PartitionBase
     {
-        protected override List<ElementBase> _elements => (List<ElementBase>)Elements.Cast<ElementBase>();
+        protected override IList _elements => Elements;
 
         /// <summary>
         /// List of Elements in the partition
@@ -137,7 +137,7 @@ namespace CobayeStudio
     [Serializable]
     public class Partition<T> : PartitionBase
     {
-        protected override List<ElementBase> _elements => (List<ElementBase>)Elements.Cast<ElementBase>();
+        protected override IList _elements => Elements;
 
         /// <summary>
         /// List of Elements in the partition
@@ -165,6 +165,14 @@ namespace CobayeStudio
             int index = GetIndex(value);
             if (index != -1) return Elements[index].Object;
             else return default;
+        }
+
+        public bool Contains(T obj)
+        {
+            foreach (Element e in Elements)
+                if (obj.Equals(e.Object))
+                    return true;
+            return false;
         }
     }
 
