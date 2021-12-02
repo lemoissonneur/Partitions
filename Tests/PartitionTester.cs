@@ -53,5 +53,45 @@ namespace CobayeStudio
 
             Assert.AreEqual(storedValues, initialValues);
         }
+
+        [Test]
+        public void TestAddElement()
+        {
+            PartitionBase partition = new Partition();
+            Partition.Element newElementA = new Partition.Element() { Color = Color.red };
+            Partition.Element newElementB = new Partition.Element() { Color = Color.blue };
+
+            partition.AddElement(newElementA);
+            partition.AddElement(newElementB);
+
+            partition.SetValues(new float[2] { 0.2f, 0.8f });
+            
+            Assert.AreEqual(Color.red, (partition as Partition).Elements[0].Color);
+            Assert.AreEqual(0.2f, (partition as Partition).Elements[0].Value);
+
+            Assert.AreEqual(Color.blue, (partition as Partition).Elements[1].Color);
+            Assert.AreEqual(0.8f, (partition as Partition).Elements[1].Value);
+        }
+
+        [Test]
+        public void TestAddElementGeneric()
+        {
+            PartitionBase partition = new Partition<Vector3>();
+            Partition<Vector3>.Element newElementA = new Partition<Vector3>.Element() { Color = Color.red, Object = Vector3.up };
+            Partition<Vector3>.Element newElementB = new Partition<Vector3>.Element() { Color = Color.blue, Object = Vector3.down };
+
+            partition.AddElement(newElementA);
+            partition.AddElement(newElementB);
+
+            partition.SetValues(new float[2] { 0.2f, 0.8f });
+
+            Assert.AreEqual(Color.red, (partition as Partition<Vector3>).Elements[0].Color);
+            Assert.AreEqual(0.2f, (partition as Partition<Vector3>).Elements[0].Value);
+            Assert.AreEqual(Vector3.up, (partition as Partition<Vector3>).Elements[0].Object);
+
+            Assert.AreEqual(Color.blue, (partition as Partition<Vector3>).Elements[1].Color);
+            Assert.AreEqual(0.8f, (partition as Partition<Vector3>).Elements[1].Value);
+            Assert.AreEqual(Vector3.down, (partition as Partition<Vector3>).Elements[1].Object);
+        }
     }
 }
