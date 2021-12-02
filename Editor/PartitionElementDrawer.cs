@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace CobayeStudio
 {
-    [CustomPropertyDrawer(typeof(PartitionBase.Element), true)]
+    [CustomPropertyDrawer(typeof(PartitionBase.ElementBase), true)]
     public class PartitionElementDrawer : PropertyDrawer
     {
         private Rect IndexLabelRect(Rect position) => new Rect(position)

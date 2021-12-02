@@ -11,30 +11,14 @@ namespace CobayeStudio
     /// Base class for PropertyDrawer
     /// </summary>
     [Serializable]
-    public class PartitionBase
+    public abstract class PartitionBase
     {
+        protected abstract List<ElementBase> _elements { get; }
+
         /// <summary>
         /// Base class for PropertyDrawer
         /// </summary>
-        [Serializable] public class Element { }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [Serializable]
-    public class Partition : PartitionBase
-    {
-        /// <summary>
-        /// List of Elements in the partition
-        /// </summary>
-        public List<Element> Elements = new List<Element>();
-
-        /// <summary>
-        /// Serialized element of the partition
-        /// </summary>
-        [Serializable]
-        public new class Element : PartitionBase.Element
+        [Serializable] public class ElementBase
         {
             /// <summary>
             /// Color of the part in inspector
@@ -54,16 +38,16 @@ namespace CobayeStudio
         /// <returns>Return 0 if given value is lower than 0, last index of elements list if value is more than 1, or -1 if list is empty</returns>
         public int GetIndex(float value)
         {
-            if (Elements.Count == 0) return -1;
+            if (_elements.Count == 0) return -1;
             if (value <= 0.0f) return 0;
-            if (value >= 1.0f) return Elements.Count - 1;
+            if (value >= 1.0f) return _elements.Count - 1;
 
             int index = 0;
-            float sum = Elements[index].Value;
+            float sum = _elements[index].Value;
 
             while (value > sum)
             {
-                sum += Elements[++index].Value;
+                sum += _elements[++index].Value;
             }
 
             return index;
@@ -74,36 +58,36 @@ namespace CobayeStudio
         /// </summary>
         /// <param name="value">value in the 0-1 range</param>
         /// <returns>null if no element found</returns>
-        public Element GetElement(float value)
+        public ElementBase GetElement(float value)
         {
             int index = GetIndex(value);
-            if (index != -1) return Elements[index];
+            if (index != -1) return _elements[index];
             else return null;
         }
 
-        public void AddElement(Element element, PartitionEditRule rule = PartitionEditRule.Default)
+        public void AddElement(ElementBase element, PartitionEditRule rule = PartitionEditRule.Default)
         {
-            Elements.Add(element);
+            _elements.Add(element);
 
-            CorrectPartition(Elements.Count - 1, rule);
+            CorrectPartition(_elements.Count - 1, rule);
         }
 
         public void RemoveElementAt(int index, PartitionEditRule rule = PartitionEditRule.Default)
         {
-            if(index >= 0 && index < Elements.Count)
+            if (index >= 0 && index < _elements.Count)
             {
-                Elements.RemoveAt(index);
+                _elements.RemoveAt(index);
 
-                CorrectPartition(Elements.Count - 1, rule);
+                CorrectPartition(_elements.Count - 1, rule);
             }
         }
 
         public void SetValues(float[] values)
         {
-            if(values.Length == Elements.Count)
+            if (values.Length == _elements.Count)
             {
-                for (int i = 0; i < Elements.Count; i++)
-                    Elements[i].Value = values[i];
+                for (int i = 0; i < _elements.Count; i++)
+                    _elements[i].Value = values[i];
             }
 
             CorrectPartition();
@@ -111,7 +95,7 @@ namespace CobayeStudio
 
         public void SetValue(int index, float value, PartitionEditRule rule = PartitionEditRule.Default)
         {
-            Elements[index].Value = value;
+            _elements[index].Value = value;
 
             CorrectPartition(index, rule);
         }
@@ -119,15 +103,31 @@ namespace CobayeStudio
         private void CorrectPartition(int index = 0, PartitionEditRule rule = PartitionEditRule.Default)
         {
             // copy values
-            float[] values = new float[Elements.Count];
-            for (int i = 0; i < Elements.Count; i++) values[i] = Elements[i].Value;
+            float[] values = new float[_elements.Count];
+            for (int i = 0; i < _elements.Count; i++) values[i] = _elements[i].Value;
 
             // correct values with the rule
             PartitionManagement.CorrectPartition(values, index, rule);
 
             // re applly corrected values
-            for (int i = 0; i < Elements.Count; i++) Elements[i].Value = values[i];
+            for (int i = 0; i < _elements.Count; i++) _elements[i].Value = values[i];
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable]
+    public class Partition : PartitionBase
+    {
+        protected override List<ElementBase> _elements => (List<ElementBase>)Elements.Cast<ElementBase>();
+
+        /// <summary>
+        /// List of Elements in the partition
+        /// </summary>
+        public List<Element> Elements = new List<Element>();
+
+        [Serializable] public class Element : ElementBase { }
     }
 
     /// <summary>
@@ -137,65 +137,22 @@ namespace CobayeStudio
     [Serializable]
     public class Partition<T> : PartitionBase
     {
+        protected override List<ElementBase> _elements => (List<ElementBase>)Elements.Cast<ElementBase>();
+
         /// <summary>
         /// List of Elements in the partition
         /// </summary>
-        public List<Element> Elements;
+        public List<Element> Elements = new List<Element>();
 
         /// <summary>
         /// Serialized element of the partition
         /// </summary>
-        [Serializable]
-        public new class Element : PartitionBase.Element
+        [Serializable] public class Element : ElementBase
         {
-            /// <summary>
-            /// Color of the part in inspector
-            /// </summary>
-            public Color Color = Color.gray;
-
-            /// <summary>
-            /// Allocated amount
-            /// </summary>
-            public float Value;
-
             /// <summary>
             /// Corresponding data for the elements
             /// </summary>
             public T Object;
-        }
-
-        /// <summary>
-        /// Return the index of elements at the given value in the partition range
-        /// </summary>
-        /// <param name="value">value in the 0-1 range</param>
-        /// <returns>Return 0 if given value is lower than 0, last index of elements list if value is more than 1, or -1 if list is empty</returns>
-        public int GetIndex(float value)
-        {
-            if (Elements.Count == 0) return -1;
-            if (value <= 0.0f) return 0;
-            if (value >= 1.0f) return Elements.Count - 1;
-
-            int index = 0;
-            float sum = Elements[index].Value;
-
-            while (value > sum)
-            {
-                sum += Elements[++index].Value;
-            }
-
-            return index;
-        }
-
-        /// <summary>
-        /// Shorthand for Elements[GetIndex(value)]
-        /// </summary>
-        /// <param name="value">value in the 0-1 range</param>
-        /// <returns>null if no element found</returns>
-        public Element GetElement(float value)
-        {
-            int index = GetIndex(value);
-            if (index != -1) return Elements[index];
-            else return null;
         }
 
         /// <summary>
